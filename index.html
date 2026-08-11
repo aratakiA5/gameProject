@@ -11,17 +11,21 @@
   <main class="desktop-space">
     <div class="world-topbar">
       <div>
-        <p class="eyebrow">STARBASE GRID</p>
-        <h1>星界拠点</h1>
+        <p class="eyebrow">UNKNOWN FRONTIER</p>
+        <h1>星界拠点と未踏領域</h1>
       </div>
       <div class="world-stats">
         <span>拠点 <b id="worldBaseLevel">Lv.1</b></span>
-        <span>生産 <b id="worldIncome">0 ◆/分</b></span>
-        <span>施設 <b id="worldBuildingCount">0 / 6</b></span>
+        <span>調査 <b id="worldExploreCount">1 / 180</b></span>
+        <span>資料 <b id="worldResearch">0</b></span>
       </div>
     </div>
-    <section id="worldGrid" class="world-grid"></section>
-    <div class="world-help">箱庭エリア / 施設は右下の「箱庭」タブから建設・強化できます</div>
+    <div class="explore-bar">
+      <div><b id="exploreStatus">拠点周辺を調査できます</b><small id="exploreHint">光っている未踏マスをクリックして探検</small></div>
+      <button id="returnBaseBtn" type="button">拠点へ帰還</button>
+    </div>
+    <section id="worldGrid" class="world-grid" aria-label="未踏領域グリッド"></section>
+    <div class="world-help">拠点から探検隊を送り、未知の地形・資源・遺跡・危険地帯を発見します</div>
   </main>
 
   <section id="gameWindow" class="game-window">

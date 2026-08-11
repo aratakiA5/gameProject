@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>星界遠征録</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">FORMATION RPG / BROWSER GAME</p>
+        <h1>星界遠征録</h1>
+        <p class="lead">4人編成で遺跡を攻略し、仲間を育成してさらに深い階層へ進むミニRPG。</p>
+      </div>
+      <div class="resource-panel">
+        <span>遺晶 <strong id="crystal">120</strong></span>
+        <span>遠征Pt <strong id="expedition">0</strong></span>
+      </div>
+    </header>
+
+    <section class="panel">
+      <div class="section-title">
+        <div>
+          <span>PARTY</span>
+          <h2>遠征編成</h2>
+        </div>
+        <p>仲間をクリックして4人まで選択</p>
+      </div>
+      <div id="roster" class="roster"></div>
+    </section>
+
+    <section class="battle-layout">
+      <div class="panel battle-panel">
+        <div class="section-title">
+          <div>
+            <span>RUINS</span>
+            <h2 id="stageName">第1層・星屑の回廊</h2>
+          </div>
+          <span class="difficulty" id="difficulty">推奨戦力 320</span>
+        </div>
+        <div class="enemy-card">
+          <div class="enemy-icon">✦</div>
+          <div>
+            <h3 id="enemyName">星蝕ウルフ</h3>
+            <p id="enemyFlavor">星の残滓に侵食された群れの先導個体。</p>
+          </div>
+          <div class="enemy-stat">戦力 <strong id="enemyPower">320</strong></div>
+        </div>
+        <div class="party-summary">
+          <span>編成人数 <strong id="partyCount">0 / 4</strong></span>
+          <span>総戦力 <strong id="partyPower">0</strong></span>
+        </div>
+        <button id="battleBtn" class="primary">遠征開始</button>
+        <div id="battleLog" class="battle-log">編成を整えて遠征を開始してください。</div>
+      </div>
+
+      <aside class="panel side-panel">
+        <div class="section-title compact">
+          <div>
+            <span>MISSION</span>
+            <h2>今日の目標</h2>
+          </div>
+        </div>
+        <div class="mission"><span>遠征を1回クリア</span><strong id="missionClear">0 / 1</strong></div>
+        <div class="mission"><span>仲間を1回強化</span><strong id="missionTrain">0 / 1</strong></div>
+        <hr />
+        <div class="section-title compact">
+          <div>
+            <span>TRAINING</span>
+            <h2>育成</h2>
+          </div>
+        </div>
+        <p class="muted">選択中の仲間を遺晶20で強化します。</p>
+        <button id="trainBtn" class="secondary">選択中を強化</button>
+      </aside>
+    </section>
+
+    <section class="panel">
+      <div class="section-title compact">
+        <div>
+          <span>PROGRESS</span>
+          <h2>踏破記録</h2>
+        </div>
+      </div>
+      <div id="stages" class="stages"></div>
+    </section>
+  </main>
+  <script src="game.js"></script>
+</body>
+</html>

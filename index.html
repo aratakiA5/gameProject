@@ -3,90 +3,77 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>星界遠征録</title>
+  <title>星界遠征録 - Corner Idle RPG</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main class="app">
-    <header class="hero">
+  <main class="desktop-space">
+    <section class="intro">
+      <p class="eyebrow">CORNER IDLE RPG</p>
+      <h1>星界遠征録</h1>
+      <p>作業中も画面右下で遠征隊が戦い続けます。小窓を展開すると編成・育成・戦闘ログを確認できます。</p>
+      <div class="hint">右下の戦闘ウィンドウを見てください ↓</div>
+    </section>
+  </main>
+
+  <section id="gameWindow" class="game-window">
+    <header class="mini-header">
       <div>
-        <p class="eyebrow">FORMATION RPG / BROWSER GAME</p>
-        <h1>星界遠征録</h1>
-        <p class="lead">4人編成で遺跡を攻略し、仲間を育成してさらに深い階層へ進むミニRPG。</p>
+        <strong>星界遠征録</strong>
+        <span id="areaLabel">星屑の回廊</span>
       </div>
-      <div class="resource-panel">
-        <span>遺晶 <strong id="crystal">120</strong></span>
-        <span>遠征Pt <strong id="expedition">0</strong></span>
+      <div class="header-actions">
+        <span class="auto-dot"></span><span>AUTO</span>
+        <button id="pauseBtn" class="icon-btn" title="一時停止">Ⅱ</button>
+        <button id="expandBtn" class="icon-btn" title="展開">▲</button>
       </div>
     </header>
 
-    <section class="panel">
-      <div class="section-title">
-        <div>
-          <span>PARTY</span>
-          <h2>遠征編成</h2>
-        </div>
-        <p>仲間をクリックして4人まで選択</p>
-      </div>
-      <div id="roster" class="roster"></div>
-    </section>
+    <div class="resource-strip">
+      <span>◆ <b id="crystal">120</b></span>
+      <span>Pt <b id="expedition">0</b></span>
+      <span>WAVE <b id="waveLabel">1 / 10</b></span>
+    </div>
 
-    <section class="battle-layout">
-      <div class="panel battle-panel">
-        <div class="section-title">
-          <div>
-            <span>RUINS</span>
-            <h2 id="stageName">第1層・星屑の回廊</h2>
-          </div>
-          <span class="difficulty" id="difficulty">推奨戦力 320</span>
-        </div>
-        <div class="enemy-card">
-          <div class="enemy-icon">✦</div>
-          <div>
-            <h3 id="enemyName">星蝕ウルフ</h3>
-            <p id="enemyFlavor">星の残滓に侵食された群れの先導個体。</p>
-          </div>
-          <div class="enemy-stat">戦力 <strong id="enemyPower">320</strong></div>
-        </div>
-        <div class="party-summary">
-          <span>編成人数 <strong id="partyCount">0 / 4</strong></span>
-          <span>総戦力 <strong id="partyPower">0</strong></span>
-        </div>
-        <button id="battleBtn" class="primary">遠征開始</button>
-        <div id="battleLog" class="battle-log">編成を整えて遠征を開始してください。</div>
+    <div class="battlefield">
+      <div id="partyField" class="party-field"></div>
+      <div class="vs-line"></div>
+      <div id="enemyField" class="enemy-field"></div>
+      <div id="floatText" class="float-text"></div>
+    </div>
+
+    <div class="mini-status">
+      <div><span id="enemyName">星蝕ウルフ</span><b id="enemyHpText"></b></div>
+      <div class="hp-track enemy-track"><i id="enemyHpBar"></i></div>
+    </div>
+
+    <div id="expandedPanel" class="expanded-panel">
+      <div class="tabs">
+        <button class="tab active" data-tab="party">編成</button>
+        <button class="tab" data-tab="train">育成</button>
+        <button class="tab" data-tab="log">ログ</button>
       </div>
 
-      <aside class="panel side-panel">
-        <div class="section-title compact">
-          <div>
-            <span>MISSION</span>
-            <h2>今日の目標</h2>
-          </div>
-        </div>
-        <div class="mission"><span>遠征を1回クリア</span><strong id="missionClear">0 / 1</strong></div>
-        <div class="mission"><span>仲間を1回強化</span><strong id="missionTrain">0 / 1</strong></div>
-        <hr />
-        <div class="section-title compact">
-          <div>
-            <span>TRAINING</span>
-            <h2>育成</h2>
-          </div>
-        </div>
-        <p class="muted">選択中の仲間を遺晶20で強化します。</p>
-        <button id="trainBtn" class="secondary">選択中を強化</button>
-      </aside>
-    </section>
-
-    <section class="panel">
-      <div class="section-title compact">
-        <div>
-          <span>PROGRESS</span>
-          <h2>踏破記録</h2>
-        </div>
+      <div id="partyTab" class="tab-content active">
+        <p class="panel-note">4人まで編成できます。変更は次の戦闘から反映されます。</p>
+        <div id="roster" class="roster"></div>
       </div>
-      <div id="stages" class="stages"></div>
-    </section>
-  </main>
+
+      <div id="trainTab" class="tab-content">
+        <div id="trainList" class="train-list"></div>
+      </div>
+
+      <div id="logTab" class="tab-content">
+        <div id="battleLog" class="battle-log"></div>
+      </div>
+    </div>
+
+    <footer class="mini-footer">
+      <span id="statusText">遠征中...</span>
+      <button id="resetBtn" class="text-btn">SAVE RESET</button>
+    </footer>
+  </section>
+
   <script src="game.js"></script>
 </body>
 </html>

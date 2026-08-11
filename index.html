@@ -8,86 +8,38 @@
 </head>
 <body>
   <main class="desktop-space">
-    <section class="intro">
-      <p class="eyebrow">CORNER IDLE RPG</p>
-      <h1>星界遠征録</h1>
-      <p>作業中も画面右下で遠征隊が戦い続けます。小窓を展開すると編成・育成・箱庭拠点・戦闘ログを確認できます。</p>
-      <div class="hint">右下の戦闘ウィンドウを見てください ↓</div>
-    </section>
+    <div class="world-topbar">
+      <div>
+        <p class="eyebrow">STARBASE GRID</p>
+        <h1>星界拠点</h1>
+      </div>
+      <div class="world-stats">
+        <span>拠点 <b id="worldBaseLevel">Lv.1</b></span>
+        <span>生産 <b id="worldIncome">0 ◆/分</b></span>
+        <span>施設 <b id="worldBuildingCount">0 / 6</b></span>
+      </div>
+    </div>
+    <section id="worldGrid" class="world-grid"></section>
+    <div class="world-help">箱庭エリア / 施設は右下の「箱庭」タブから建設・強化できます</div>
   </main>
 
   <section id="gameWindow" class="game-window">
     <header class="mini-header">
-      <div>
-        <strong>星界遠征録</strong>
-        <span id="areaLabel">星屑の回廊</span>
-      </div>
-      <div class="header-actions">
-        <span class="auto-dot"></span><span>AUTO</span>
-        <button id="pauseBtn" class="icon-btn" title="一時停止">Ⅱ</button>
-        <button id="expandBtn" class="icon-btn" title="展開">▲</button>
-      </div>
+      <div><strong>星界遠征録</strong><span id="areaLabel">星屑の回廊</span></div>
+      <div class="header-actions"><span class="auto-dot"></span><span>AUTO</span><button id="pauseBtn" class="icon-btn" title="一時停止">Ⅱ</button><button id="expandBtn" class="icon-btn" title="展開">▲</button></div>
     </header>
-
-    <div class="resource-strip">
-      <span>◆ <b id="crystal">120</b></span>
-      <span>Pt <b id="expedition">0</b></span>
-      <span>WAVE <b id="waveLabel">1 / 10</b></span>
-    </div>
-
-    <div class="battlefield">
-      <div id="partyField" class="party-field"></div>
-      <div class="vs-line"></div>
-      <div id="enemyField" class="enemy-field"></div>
-      <div id="floatText" class="float-text"></div>
-    </div>
-
-    <div class="mini-status">
-      <div><span id="enemyName">星蝕ウルフ</span><b id="enemyHpText"></b></div>
-      <div class="hp-track enemy-track"><i id="enemyHpBar"></i></div>
-    </div>
-
+    <div class="resource-strip"><span>◆ <b id="crystal">120</b></span><span>Pt <b id="expedition">0</b></span><span>WAVE <b id="waveLabel">1 / 10</b></span></div>
+    <div class="battlefield"><div id="partyField" class="party-field"></div><div class="vs-line"></div><div id="enemyField" class="enemy-field"></div><div id="floatText" class="float-text"></div></div>
+    <div class="mini-status"><div><span id="enemyName">星蝕ウルフ</span><b id="enemyHpText"></b></div><div class="hp-track enemy-track"><i id="enemyHpBar"></i></div></div>
     <div id="expandedPanel" class="expanded-panel">
-      <div class="tabs">
-        <button class="tab active" data-tab="party">編成</button>
-        <button class="tab" data-tab="train">育成</button>
-        <button class="tab" data-tab="village">箱庭</button>
-        <button class="tab" data-tab="log">ログ</button>
-      </div>
-
-      <div id="partyTab" class="tab-content active">
-        <p class="panel-note">4人まで編成できます。変更は次の戦闘から反映されます。</p>
-        <div id="roster" class="roster"></div>
-      </div>
-
-      <div id="trainTab" class="tab-content">
-        <div id="trainList" class="train-list"></div>
-      </div>
-
-      <div id="villageTab" class="tab-content">
-        <div class="village-head">
-          <div><span>星界拠点</span><b id="baseLevel">Lv.1</b></div>
-          <div class="village-income">自動生産 <b id="incomeRate">0</b> ◆/分</div>
-        </div>
-        <div id="villageMap" class="village-map"></div>
-        <div class="village-bonuses">
-          <span>攻撃支援 <b id="atkBonus">+0%</b></span>
-          <span>HP支援 <b id="hpBonus">+0%</b></span>
-        </div>
-        <div id="buildingList" class="building-list"></div>
-      </div>
-
-      <div id="logTab" class="tab-content">
-        <div id="battleLog" class="battle-log"></div>
-      </div>
+      <div class="tabs"><button class="tab active" data-tab="party">編成</button><button class="tab" data-tab="train">育成</button><button class="tab" data-tab="village">箱庭</button><button class="tab" data-tab="log">ログ</button></div>
+      <div id="partyTab" class="tab-content active"><p class="panel-note">4人まで編成できます。変更は次の戦闘から反映されます。</p><div id="roster" class="roster"></div></div>
+      <div id="trainTab" class="tab-content"><div id="trainList" class="train-list"></div></div>
+      <div id="villageTab" class="tab-content"><div class="village-head"><div><span>星界拠点</span><b id="baseLevel">Lv.1</b></div><div class="village-income">自動生産 <b id="incomeRate">0</b> ◆/分</div></div><div id="villageMap" class="village-map"></div><div class="village-bonuses"><span>攻撃支援 <b id="atkBonus">+0%</b></span><span>HP支援 <b id="hpBonus">+0%</b></span></div><div id="buildingList" class="building-list"></div></div>
+      <div id="logTab" class="tab-content"><div id="battleLog" class="battle-log"></div></div>
     </div>
-
-    <footer class="mini-footer">
-      <span id="statusText">遠征中...</span>
-      <button id="resetBtn" class="text-btn">SAVE RESET</button>
-    </footer>
+    <footer class="mini-footer"><span id="statusText">遠征中...</span><button id="resetBtn" class="text-btn">SAVE RESET</button></footer>
   </section>
-
   <script src="game.js"></script>
 </body>
 </html>

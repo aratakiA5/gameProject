@@ -1,0 +1,45 @@
+:root { color-scheme: dark; font-family: Inter, "Noto Sans JP", system-ui, sans-serif; background:#090d18; color:#eef2ff; }
+* { box-sizing:border-box; }
+body { margin:0; min-height:100vh; background:radial-gradient(circle at 20% 0%,#1d2850 0,transparent 32%),linear-gradient(180deg,#090d18,#10172a); }
+.app { width:min(1180px,calc(100% - 32px)); margin:auto; padding:42px 0 70px; }
+.hero { display:flex; justify-content:space-between; gap:24px; align-items:flex-end; margin-bottom:28px; }
+.eyebrow,.section-title span { color:#8999d8; letter-spacing:.18em; font-size:.72rem; font-weight:800; }
+h1 { margin:4px 0; font-size:clamp(2.2rem,6vw,4.7rem); letter-spacing:-.06em; }
+.lead,.muted { color:#aab3ce; }
+.resource-panel { display:flex; gap:12px; flex-wrap:wrap; }
+.resource-panel span,.difficulty { padding:10px 14px; border:1px solid #344168; background:#151d34; border-radius:999px; }
+.panel { background:rgba(17,24,43,.9); border:1px solid #273252; border-radius:18px; padding:22px; box-shadow:0 18px 60px rgba(0,0,0,.22); }
+.section-title { display:flex; align-items:end; justify-content:space-between; gap:16px; margin-bottom:18px; }
+.section-title h2 { margin:3px 0 0; font-size:1.25rem; }
+.section-title p { margin:0; color:#7f8baa; font-size:.85rem; }
+.compact { margin-bottom:14px; }
+.roster { display:grid; grid-template-columns:repeat(6,1fr); gap:12px; }
+.character { border:1px solid #303b5e; background:#121a30; border-radius:14px; padding:14px; cursor:pointer; transition:.18s ease; position:relative; overflow:hidden; }
+.character:hover { transform:translateY(-2px); border-color:#6678bd; }
+.character.selected { outline:2px solid #93a7ff; background:#1a2546; }
+.character .portrait { height:74px; display:grid; place-items:center; font-size:2rem; border-radius:10px; background:linear-gradient(135deg,#222e52,#11182d); margin-bottom:10px; }
+.character h3 { margin:0 0 3px; font-size:.95rem; }
+.character p { margin:0; color:#8d99bb; font-size:.75rem; }
+.character .power { display:block; margin-top:8px; color:#d9e0ff; font-size:.8rem; }
+.battle-layout { display:grid; grid-template-columns:2fr 1fr; gap:18px; margin:18px 0; }
+.enemy-card { min-height:150px; display:flex; align-items:center; gap:18px; padding:20px; background:linear-gradient(120deg,#211c36,#151d34); border:1px solid #3b355b; border-radius:14px; }
+.enemy-icon { width:86px; height:86px; border-radius:50%; display:grid; place-items:center; font-size:2.5rem; background:#2b2448; box-shadow:inset 0 0 30px #63568f; }
+.enemy-card h3 { margin:0 0 6px; font-size:1.35rem; }
+.enemy-card p { color:#959fbd; margin:0; }
+.enemy-stat { margin-left:auto; color:#9ca8ca; }
+.party-summary { display:flex; gap:24px; padding:16px 2px; color:#929dbd; }
+button { width:100%; border:0; border-radius:12px; padding:14px; font-weight:800; cursor:pointer; font-size:.95rem; }
+.primary { color:#101526; background:linear-gradient(90deg,#a9b7ff,#c6d0ff); }
+.secondary { color:#e8ecff; background:#263253; border:1px solid #40517f; }
+button:disabled { opacity:.45; cursor:not-allowed; }
+.battle-log { margin-top:14px; min-height:54px; padding:14px; background:#0d1324; border-radius:10px; color:#a9b2cd; line-height:1.55; }
+.mission { display:flex; justify-content:space-between; gap:12px; padding:12px 0; color:#aab4d2; }
+hr { border:0; border-top:1px solid #2a3555; margin:18px 0; }
+.stages { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
+.stage { padding:14px; border:1px solid #2c3758; border-radius:12px; background:#11192d; cursor:pointer; }
+.stage.locked { opacity:.38; cursor:not-allowed; }
+.stage.active { border-color:#91a5ff; background:#1a2545; }
+.stage strong,.stage small { display:block; }
+.stage small { color:#7f8aaa; margin-top:5px; }
+@media(max-width:850px){ .roster{grid-template-columns:repeat(3,1fr)} .battle-layout{grid-template-columns:1fr} .stages{grid-template-columns:repeat(2,1fr)} .hero{align-items:flex-start;flex-direction:column} }
+@media(max-width:520px){ .app{width:min(100% - 20px,1180px);padding-top:24px}.roster{grid-template-columns:repeat(2,1fr)}.enemy-card{align-items:flex-start;flex-wrap:wrap}.enemy-stat{margin-left:0;width:100%} }

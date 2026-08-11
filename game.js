@@ -1,226 +1,139 @@
-const characters = [
-  {id:1,name:'レイナ',role:'斬撃 / 主力',icon:'⚔',power:128,lv:1},
-  {id:2,name:'シエル',role:'術式 / 範囲',icon:'✧',power:116,lv:1},
-  {id:3,name:'アデル',role:'守護 / 防御',icon:'◆',power:108,lv:1},
-  {id:4,name:'ノア',role:'支援 / 加速',icon:'◇',power:102,lv:1},
-  {id:5,name:'カリン',role:'射撃 / 会心',icon:'➶',power:121,lv:1},
-  {id:6,name:'ミレイ',role:'治癒 / 回復',icon:'✚',power:99,lv:1}
-];
-
-const stages = [
-  {name:'星屑の回廊',enemy:'星蝕ウルフ',flavor:'星の残滓に侵食された群れの先導個体。',power:320,reward:35},
-  {name:'蒼晶坑道',enemy:'晶殻ゴーレム',flavor:'鉱脈の魔力を取り込み続ける古代兵器。',power:430,reward:45},
-  {name:'忘却庭園',enemy:'夢喰いの花',flavor:'甘い幻覚で旅人を惑わせる巨大植物。',power:550,reward:55},
-  {name:'月影祭壇',enemy:'月輪の騎士',flavor:'主を失ってなお祭壇を守り続ける騎士。',power:680,reward:70},
-  {name:'星界中枢',enemy:'虚星竜アステル',flavor:'遺跡最深部で眠る星界の守護竜。',power:830,reward:100}
-];
-
-let selected=[];
-let selectedForTrain=null;
-let unlocked=1;
-let currentStage=0;
-let crystal=120;
-let expedition=0;
-let clears=0;
-let trained=0;
-let battling=false;
-
+const SAVE_KEY='seikai-corner-idle-v1';
 const $=id=>document.getElementById(id);
-const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const rand=(min,max)=>Math.floor(Math.random()*(max-min+1))+min;
 
+const baseCharacters=[
+  {id:1,name:'レイナ',role:'主力',icon:'⚔',power:128,lv:1},
+  {id:2,name:'シエル',role:'術式',icon:'✧',power:116,lv:1},
+  {id:3,name:'アデル',role:'守護',icon:'◆',power:108,lv:1},
+  {id:4,name:'ノア',role:'支援',icon:'◇',power:102,lv:1},
+  {id:5,name:'カリン',role:'射撃',icon:'➶',power:121,lv:1},
+  {id:6,name:'ミレイ',role:'治癒',icon:'✚',power:99,lv:1}
+];
+const areas=[
+  {name:'星屑の回廊',enemies:['星蝕ウルフ','星屑スライム','廃都バット'],boss:'晶牙フェンリル'},
+  {name:'蒼晶坑道',enemies:['晶殻ゴーレム','蒼鉱ワーム','坑道ミミック'],boss:'鉱王タイタス'},
+  {name:'忘却庭園',enemies:['夢喰いの花','霧羽モス','古樹の番人'],boss:'夢花女王エルシア'},
+  {name:'月影祭壇',enemies:['月輪の騎士','影走り','祭壇の魔像'],boss:'月蝕騎士ノクス'},
+  {name:'星界中枢',enemies:['星骸兵','虚空の眼','中枢守護機'],boss:'虚星竜アステル'}
+];
+
+let state=loadState();
+let characters=state.characters;
+let party=[];
+let enemy=null;
+let paused=false;
+let expanded=false;
+let battleToken=0;
+
+function freshState(){return{characters:baseCharacters.map(x=>({...x})),selected:[1,2,3,6],crystal:120,expedition:0,area:0,wave:1,kills:0};}
+function loadState(){try{const raw=JSON.parse(localStorage.getItem(SAVE_KEY));if(!raw)return freshState();return{...freshState(),...raw,characters:baseCharacters.map(base=>({...base,...(raw.characters||[]).find(c=>c.id===base.id)}))};}catch{return freshState();}}
+function save(){state.characters=characters;localStorage.setItem(SAVE_KEY,JSON.stringify(state));}
+function selectedCharacters(){return characters.filter(c=>state.selected.includes(c.id));}
+
+function maxHpFor(c){return Math.round(c.power*(c.role==='守護'?5.8:4.4));}
+function createParty(){return selectedCharacters().map(c=>({...c,maxHp:maxHpFor(c),hp:maxHpFor(c),buff:1}));}
+function living(){return party.filter(c=>c.hp>0);}
+function area(){return areas[state.area%areas.length];}
+function enemyScale(){return 1+(state.area*.34)+((state.wave-1)*.065);}
+function spawnEnemy(){
+  const boss=state.wave===10;
+  const a=area();
+  const name=boss?a.boss:a.enemies[(state.wave-1)%a.enemies.length];
+  const base=220*enemyScale();
+  const power=Math.round(base*(boss?1.42:1));
+  const maxHp=Math.round(power*(boss?5.7:4.2));
+  enemy={name,power,maxHp,hp:maxHp,boss,icon:boss?'♛':['👾','✦','◈'][(state.wave-1)%3]};
+  renderBattlefield();
+}
+
+function renderAll(){
+  $('crystal').textContent=state.crystal;
+  $('expedition').textContent=state.expedition;
+  $('waveLabel').textContent=`${state.wave} / 10`;
+  $('areaLabel').textContent=area().name;
+  renderRoster();renderTrain();renderBattlefield();
+}
 function renderRoster(){
-  $('roster').innerHTML=characters.map(c=>`<article class="character ${selected.includes(c.id)?'selected':''}" data-id="${c.id}"><div class="portrait">${c.icon}</div><h3>${c.name} <small>Lv.${c.lv}</small></h3><p>${c.role}</p><span class="power">戦力 ${c.power}</span></article>`).join('');
+  $('roster').innerHTML=characters.map(c=>`<div class="character ${state.selected.includes(c.id)?'selected':''}" data-id="${c.id}"><b>${c.icon} ${c.name}</b><small>Lv.${c.lv} / ${c.role} / 戦力 ${c.power}</small></div>`).join('');
   document.querySelectorAll('.character').forEach(el=>el.onclick=()=>{
-    if(!battling) toggleCharacter(Number(el.dataset.id));
+    const id=Number(el.dataset.id);
+    if(state.selected.includes(id)){if(state.selected.length>1)state.selected=state.selected.filter(x=>x!==id);}else if(state.selected.length<4)state.selected.push(id);
+    save();renderRoster();appendLog(`編成を変更。次の戦闘から反映されます。`);
   });
 }
+function renderTrain(){
+  $('trainList').innerHTML=characters.map(c=>`<div class="train-row"><div><b>${c.icon} ${c.name} Lv.${c.lv}</b><span>戦力 ${c.power} / 強化費 ◆${trainCost(c)}</span></div><button data-train="${c.id}" ${state.crystal<trainCost(c)?'disabled':''}>強化</button></div>`).join('');
+  document.querySelectorAll('[data-train]').forEach(btn=>btn.onclick=()=>train(Number(btn.dataset.train)));
+}
+function trainCost(c){return 20+(c.lv-1)*8;}
+function train(id){const c=characters.find(x=>x.id===id),cost=trainCost(c);if(state.crystal<cost)return;state.crystal-=cost;c.lv++;c.power+=18+rand(0,7);save();renderAll();appendLog(`${c.name}をLv.${c.lv}へ強化。戦力 ${c.power}。`);}
 
-function toggleCharacter(id){
-  selectedForTrain=id;
-  if(selected.includes(id)) selected=selected.filter(x=>x!==id);
-  else if(selected.length<4) selected.push(id);
-  render();
+function renderBattlefield(){
+  if(!party.length)party=createParty();
+  $('partyField').innerHTML=party.map(c=>`<div id="ally-${c.id}" class="unit ${c.hp<=0?'dead':''}"><div class="sprite">${c.icon}</div><span class="unit-name">${c.name}</span><div class="unit-hp"><i style="width:${Math.max(0,c.hp/c.maxHp*100)}%"></i></div></div>`).join('');
+  if(enemy){
+    $('enemyField').innerHTML=`<div id="enemyUnit" class="unit enemy"><div class="sprite">${enemy.icon}</div><span class="unit-name">${enemy.boss?'BOSS ':''}${enemy.name}</span><div class="unit-hp"><i style="width:${Math.max(0,enemy.hp/enemy.maxHp*100)}%"></i></div></div>`;
+    $('enemyName').textContent=(enemy.boss?'BOSS / ':'')+enemy.name;
+    $('enemyHpText').textContent=`${Math.max(0,Math.round(enemy.hp))} / ${enemy.maxHp}`;
+    $('enemyHpBar').style.width=`${Math.max(0,enemy.hp/enemy.maxHp*100)}%`;
+  }
+}
+function updateUnitHp(id){const unit=party.find(c=>c.id===id),el=$(`ally-${id}`);if(!unit||!el)return;el.querySelector('.unit-hp i').style.width=`${Math.max(0,unit.hp/unit.maxHp*100)}%`;if(unit.hp<=0)el.classList.add('dead');}
+function updateEnemyHp(){if(!enemy)return;$('enemyHpText').textContent=`${Math.max(0,Math.round(enemy.hp))} / ${enemy.maxHp}`;$('enemyHpBar').style.width=`${Math.max(0,enemy.hp/enemy.maxHp*100)}%`;const bar=document.querySelector('#enemyUnit .unit-hp i');if(bar)bar.style.width=`${Math.max(0,enemy.hp/enemy.maxHp*100)}%`;}
+function animate(id,cls='attacking'){const el=$(id);if(!el)return;el.classList.add(cls);setTimeout(()=>el.classList.remove(cls),240);}
+function floatText(text){const el=$('floatText');el.textContent=text;el.classList.remove('show');void el.offsetWidth;el.classList.add('show');}
+function appendLog(msg){const log=$('battleLog');const row=document.createElement('div');row.innerHTML=msg;log.appendChild(row);while(log.children.length>80)log.removeChild(log.firstChild);log.scrollTop=log.scrollHeight;}
+
+async function allyTurn(actor,token){
+  if(token!==battleToken||paused||actor.hp<=0||!enemy||enemy.hp<=0)return;
+  if(actor.role==='治癒'){
+    const target=[...living()].sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0];
+    if(target&&target.hp/target.maxHp<.72){const heal=Math.min(target.maxHp-target.hp,Math.round(actor.power*(.78+Math.random()*.24)));target.hp+=heal;animate(`ally-${actor.id}`);updateUnitHp(target.id);floatText(`+${heal} HP`);appendLog(`✚ ${actor.name} → ${target.name}を${heal}回復`);return;}
+  }
+  if(actor.role==='支援'){living().forEach(x=>x.buff=1.2);animate(`ally-${actor.id}`);floatText('ATK UP');appendLog(`◇ ${actor.name} → 味方を強化`);return;}
+  let multi=.58+Math.random()*.28;if(actor.role==='主力')multi+=.18;if(actor.role==='術式')multi+=.1;
+  let critical=false;if(actor.role==='射撃'&&Math.random()<.32){multi*=1.7;critical=true;}
+  const dmg=Math.max(1,Math.round(actor.power*multi*actor.buff));actor.buff=1;enemy.hp-=dmg;
+  animate(`ally-${actor.id}`);setTimeout(()=>animate('enemyUnit','hit'),100);updateEnemyHp();floatText(`${critical?'CRIT ':''}-${dmg}`);appendLog(`${actor.icon} ${actor.name} → ${enemy.name} ${dmg}ダメージ`);
+}
+async function enemyTurn(token){
+  if(token!==battleToken||paused||!enemy||enemy.hp<=0||!living().length)return;
+  const tank=living().find(c=>c.role==='守護');const target=tank&&Math.random()<.65?tank:living()[rand(0,living().length-1)];
+  let dmg=Math.round(enemy.power*(.10+Math.random()*.055));if(target.role==='守護')dmg=Math.round(dmg*.65);target.hp-=dmg;
+  animate('enemyUnit');setTimeout(()=>animate(`ally-${target.id}`,'hit'),100);updateUnitHp(target.id);floatText(`-${dmg}`);appendLog(`◆ ${enemy.name} → ${target.name} ${dmg}ダメージ`);
 }
 
-function partyPower(){
-  return characters.filter(c=>selected.includes(c.id)).reduce((s,c)=>s+c.power,0);
-}
-
-function renderStages(){
-  $('stages').innerHTML=stages.map((s,i)=>`<div class="stage ${i>=unlocked?'locked':''} ${i===currentStage?'active':''}" data-stage="${i}"><strong>第${i+1}層</strong><small>${s.name}</small><small>推奨 ${s.power}</small></div>`).join('');
-  document.querySelectorAll('.stage:not(.locked)').forEach(el=>el.onclick=()=>{
-    if(!battling){
-      currentStage=Number(el.dataset.stage);
-      render();
+async function battleLoop(){
+  while(true){
+    if(paused){await sleep(250);continue;}
+    if(!enemy){party=createParty();spawnEnemy();appendLog(`WAVE ${state.wave}：${enemy.name} 出現`);}
+    const token=++battleToken;
+    let rounds=0;
+    while(enemy&&enemy.hp>0&&living().length&&rounds<40&&token===battleToken){
+      if(paused){await sleep(250);continue;}
+      for(const actor of party){if(enemy.hp<=0||paused||token!==battleToken)break;await allyTurn(actor,token);await sleep(520);}
+      if(enemy.hp<=0||paused||token!==battleToken)continue;
+      await enemyTurn(token);await sleep(650);rounds++;
     }
-  });
-}
-
-function render(){
-  renderRoster();
-  renderStages();
-  const s=stages[currentStage];
-  $('stageName').textContent=`第${currentStage+1}層・${s.name}`;
-  $('difficulty').textContent=`推奨戦力 ${s.power}`;
-  $('enemyName').textContent=s.enemy;
-  $('enemyFlavor').textContent=s.flavor;
-  $('enemyPower').textContent=s.power;
-  $('partyCount').textContent=`${selected.length} / 4`;
-  $('partyPower').textContent=partyPower();
-  $('crystal').textContent=crystal;
-  $('expedition').textContent=expedition;
-  $('missionClear').textContent=`${Math.min(clears,1)} / 1`;
-  $('missionTrain').textContent=`${Math.min(trained,1)} / 1`;
-  $('battleBtn').disabled=battling||selected.length===0;
-  $('battleBtn').textContent=battling?'オート戦闘中...':'遠征開始';
-  $('trainBtn').disabled=battling||!selectedForTrain||crystal<20;
-}
-
-function createBattleParty(){
-  return characters
-    .filter(c=>selected.includes(c.id))
-    .map(c=>{
-      const isTank=c.role.includes('守護');
-      const maxHp=Math.round(c.power*(isTank?6.4:4.8));
-      return {...c,maxHp,hp:maxHp,buff:1};
-    });
-}
-
-function livingParty(party){
-  return party.filter(c=>c.hp>0);
-}
-
-function hpText(unit){
-  return `${Math.max(0,Math.round(unit.hp))}/${unit.maxHp}`;
-}
-
-function appendLog(message){
-  const log=$('battleLog');
-  log.innerHTML+=`<div>${message}</div>`;
-  log.scrollTop=log.scrollHeight;
-}
-
-async function allyAction(actor,party,enemy,turn){
-  if(actor.hp<=0||enemy.hp<=0) return;
-
-  if(actor.role.includes('治癒')){
-    const injured=livingParty(party).sort((a,b)=>(a.hp/a.maxHp)-(b.hp/b.maxHp))[0];
-    if(injured && injured.hp/injured.maxHp<0.82){
-      const heal=Math.round(actor.power*(0.8+Math.random()*0.25));
-      const actual=Math.min(heal,injured.maxHp-injured.hp);
-      injured.hp+=actual;
-      appendLog(`✚ ${actor.name}が${injured.name}を回復。HP +${actual}（${hpText(injured)}）`);
-      return;
-    }
+    if(token!==battleToken)continue;
+    if(enemy&&enemy.hp<=0){await victory();}
+    else if(!living().length||rounds>=40){await defeat();}
+    await sleep(850);
   }
-
-  if(actor.role.includes('支援')){
-    const allies=livingParty(party).filter(c=>c.id!==actor.id);
-    if(allies.length){
-      allies.forEach(c=>c.buff=1.18);
-      appendLog(`◇ ${actor.name}が味方を支援。次の攻撃ダメージが上昇。`);
-    }
-  }
-
-  let multiplier=0.62+Math.random()*0.28;
-  if(actor.role.includes('主力')) multiplier+=0.16;
-  if(actor.role.includes('会心') && Math.random()<0.32){
-    multiplier*=1.65;
-    appendLog(`➶ ${actor.name}の会心攻撃！`);
-  }
-  if(actor.role.includes('範囲')) multiplier+=0.08;
-
-  const damage=Math.max(1,Math.round(actor.power*multiplier*actor.buff));
-  actor.buff=1;
-  enemy.hp-=damage;
-  appendLog(`${actor.icon} ${actor.name}の攻撃。${enemy.name}に <strong>${damage}</strong> ダメージ（敵HP ${Math.max(0,enemy.hp)}/${enemy.maxHp}）`);
 }
-
-async function enemyAction(enemy,party,turn){
-  const targets=livingParty(party);
-  if(!targets.length||enemy.hp<=0) return;
-
-  let target;
-  const tank=targets.find(c=>c.role.includes('守護'));
-  target=tank&&Math.random()<0.65?tank:targets[rand(0,targets.length-1)];
-
-  let damage=Math.round(enemy.power*(0.12+Math.random()*0.07));
-  if(target.role.includes('守護')) damage=Math.round(damage*0.68);
-
-  if(turn%4===0){
-    appendLog(`⚠ ${enemy.name}が強力な攻撃を放つ！`);
-    damage=Math.round(damage*1.55);
-  }
-
-  target.hp-=damage;
-  appendLog(`◆ ${enemy.name}の攻撃。${target.name}に <strong>${damage}</strong> ダメージ（HP ${hpText(target)}）`);
-  if(target.hp<=0) appendLog(`— ${target.name}は戦闘不能になった。`);
+async function victory(){
+  const wasBoss=enemy.boss;const reward=Math.round(8+enemy.power*.055)+(wasBoss?25:0);state.crystal+=reward;state.expedition+=wasBoss?15:3;state.kills++;
+  appendLog(`<b>${enemy.name}撃破！</b> ◆${reward} 獲得`);$('statusText').textContent=`撃破数 ${state.kills} / 自動遠征中`;
+  if(wasBoss){state.wave=1;state.area=(state.area+1)%areas.length;appendLog(`<b>AREA CLEAR</b> → ${area().name}`);}else state.wave++;
+  enemy=null;party=createParty();save();renderAll();
 }
+async function defeat(){appendLog(`<b>全滅。</b> 3秒後に再出撃します。`);$('statusText').textContent='再編成中...';enemy=null;party=createParty();renderBattlefield();await sleep(3000);$('statusText').textContent='遠征中...';}
 
-async function startAutoBattle(){
-  if(battling||selected.length===0) return;
+$('expandBtn').onclick=()=>{expanded=!expanded;$('gameWindow').classList.toggle('expanded',expanded);$('expandBtn').textContent=expanded?'▼':'▲';};
+$('pauseBtn').onclick=()=>{paused=!paused;$('gameWindow').classList.toggle('paused',paused);$('pauseBtn').textContent=paused?'▶':'Ⅱ';$('statusText').textContent=paused?'一時停止中':'遠征中...';};
+document.querySelectorAll('.tab').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.tab,.tab-content').forEach(x=>x.classList.remove('active'));btn.classList.add('active');$(`${btn.dataset.tab}Tab`).classList.add('active');});
+$('resetBtn').onclick=()=>{if(confirm('セーブデータを初期化しますか？')){localStorage.removeItem(SAVE_KEY);location.reload();}};
 
-  battling=true;
-  render();
-
-  const s=stages[currentStage];
-  const party=createBattleParty();
-  const enemy={
-    name:s.enemy,
-    power:s.power,
-    maxHp:Math.round(s.power*4.1),
-    hp:Math.round(s.power*4.1)
-  };
-
-  $('battleLog').innerHTML=`<div><strong>AUTO BATTLE START</strong></div><div>${s.enemy} HP ${enemy.hp} / ${enemy.maxHp}</div>`;
-  await sleep(500);
-
-  let turn=1;
-  const maxTurns=30;
-
-  while(livingParty(party).length&&enemy.hp>0&&turn<=maxTurns){
-    appendLog(`<br><strong>TURN ${turn}</strong>`);
-
-    for(const actor of party){
-      if(enemy.hp<=0) break;
-      await allyAction(actor,party,enemy,turn);
-      await sleep(420);
-    }
-
-    if(enemy.hp<=0) break;
-    await enemyAction(enemy,party,turn);
-    await sleep(520);
-    turn++;
-  }
-
-  if(enemy.hp<=0){
-    clears++;
-    crystal+=s.reward;
-    expedition+=10*(currentStage+1);
-    const newlyUnlocked=currentStage===unlocked-1&&unlocked<stages.length;
-    if(newlyUnlocked) unlocked++;
-    appendLog(`<br><strong>遠征成功。</strong> ${s.enemy}を撃破！ 遺晶 +${s.reward} / 遠征Pt +${10*(currentStage+1)}${newlyUnlocked?' / 次の階層が解放されました。':''}`);
-  }else{
-    expedition+=2;
-    appendLog(`<br><strong>遠征失敗。</strong> パーティが全滅、または30ターン経過。遠征Pt +2`);
-  }
-
-  battling=false;
-  render();
-}
-
-$('battleBtn').onclick=startAutoBattle;
-
-$('trainBtn').onclick=()=>{
-  if(battling||!selectedForTrain||crystal<20) return;
-  const c=characters.find(x=>x.id===selectedForTrain);
-  crystal-=20;
-  c.lv++;
-  c.power+=18+Math.floor(Math.random()*8);
-  trained++;
-  $('battleLog').innerHTML=`${c.name}をLv.${c.lv}へ強化しました。現在の戦力は ${c.power}。`;
-  render();
-};
-
-render();
+party=createParty();spawnEnemy();renderAll();appendLog(`自動遠征を開始しました。`);battleLoop();

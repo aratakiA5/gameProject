@@ -18,14 +18,28 @@
         <span>拠点 <b id="worldBaseLevel">Lv.1</b></span>
         <span>調査 <b id="worldExploreCount">1 / 180</b></span>
         <span>資料 <b id="worldResearch">0</b></span>
+        <span>図鑑 <b id="worldDexCount">0 / 6</b></span>
       </div>
     </div>
     <div class="explore-bar">
       <div><b id="exploreStatus">拠点周辺を調査できます</b><small id="exploreHint">光っている未踏マスをクリックして探検</small></div>
-      <button id="returnBaseBtn" type="button">拠点へ帰還</button>
+      <div class="explore-actions">
+        <button id="dexBtn" type="button">図鑑</button>
+        <button id="returnBaseBtn" type="button">拠点へ帰還</button>
+      </div>
     </div>
     <section id="worldGrid" class="world-grid" aria-label="未踏領域グリッド"></section>
     <div class="world-help">拠点から探検隊を送り、未知の地形・資源・遺跡・危険地帯を発見します</div>
+
+    <aside id="dexPanel" class="dex-panel" aria-hidden="true">
+      <div class="dex-header">
+        <div><small>EXPLORATION ARCHIVE</small><h2>星界図鑑</h2></div>
+        <button id="dexCloseBtn" type="button" aria-label="図鑑を閉じる">×</button>
+      </div>
+      <div class="dex-progress"><span>登録率</span><b id="dexProgressText">0 / 6</b><div class="dex-progress-track"><i id="dexProgressBar"></i></div></div>
+      <div id="dexGrid" class="dex-grid"></div>
+      <div id="dexDetail" class="dex-detail">探検で発見した項目を選択すると詳細を確認できます。</div>
+    </aside>
   </main>
 
   <section id="gameWindow" class="game-window">

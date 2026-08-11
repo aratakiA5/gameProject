@@ -11,7 +11,7 @@
     <section class="intro">
       <p class="eyebrow">CORNER IDLE RPG</p>
       <h1>星界遠征録</h1>
-      <p>作業中も画面右下で遠征隊が戦い続けます。小窓を展開すると編成・育成・戦闘ログを確認できます。</p>
+      <p>作業中も画面右下で遠征隊が戦い続けます。小窓を展開すると編成・育成・箱庭拠点・戦闘ログを確認できます。</p>
       <div class="hint">右下の戦闘ウィンドウを見てください ↓</div>
     </section>
   </main>
@@ -51,6 +51,7 @@
       <div class="tabs">
         <button class="tab active" data-tab="party">編成</button>
         <button class="tab" data-tab="train">育成</button>
+        <button class="tab" data-tab="village">箱庭</button>
         <button class="tab" data-tab="log">ログ</button>
       </div>
 
@@ -61,6 +62,19 @@
 
       <div id="trainTab" class="tab-content">
         <div id="trainList" class="train-list"></div>
+      </div>
+
+      <div id="villageTab" class="tab-content">
+        <div class="village-head">
+          <div><span>星界拠点</span><b id="baseLevel">Lv.1</b></div>
+          <div class="village-income">自動生産 <b id="incomeRate">0</b> ◆/分</div>
+        </div>
+        <div id="villageMap" class="village-map"></div>
+        <div class="village-bonuses">
+          <span>攻撃支援 <b id="atkBonus">+0%</b></span>
+          <span>HP支援 <b id="hpBonus">+0%</b></span>
+        </div>
+        <div id="buildingList" class="building-list"></div>
       </div>
 
       <div id="logTab" class="tab-content">

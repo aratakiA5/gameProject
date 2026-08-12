@@ -6,6 +6,7 @@
   <title>星界遠征録 - Corner Idle RPG</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="world.css" />
+  <link rel="stylesheet" href="crafting.css" />
 </head>
 <body>
   <main class="desktop-space">
@@ -24,6 +25,7 @@
     <div class="explore-bar">
       <div><b id="exploreStatus">AUTO探索を開始します</b><small id="exploreHint">未踏領域の敵を全滅させると領域が広がります</small></div>
       <div class="explore-actions">
+        <button id="craftBtn" type="button">開発・鍛冶</button>
         <button id="dexBtn" type="button">図鑑</button>
         <button id="returnBaseBtn" type="button">拠点へ帰還</button>
       </div>
@@ -43,6 +45,24 @@
       <div class="dex-progress"><span id="dexProgressLabel">地形登録率</span><b id="dexProgressText">0 / 6</b><div class="dex-progress-track"><i id="dexProgressBar"></i></div></div>
       <div id="dexGrid" class="dex-grid"></div>
       <div id="dexDetail" class="dex-detail">探検で発見した項目を選択すると詳細を確認できます。</div>
+    </aside>
+
+    <aside id="craftPanel" class="craft-panel" aria-hidden="true">
+      <div class="craft-header">
+        <div><small>BASE WORKSHOP</small><h2>開発・鍛冶工房</h2></div>
+        <button id="craftCloseBtn" type="button" aria-label="工房を閉じる">×</button>
+      </div>
+      <div class="craft-summary">利用可能な調査資料 <b id="craftResearch">0</b> / 敵から得た素材を研究・鍛冶に利用します</div>
+      <div class="craft-tabs">
+        <button type="button" class="craft-tab active" data-craft-tab="materials">素材</button>
+        <button type="button" class="craft-tab" data-craft-tab="development">開発</button>
+        <button type="button" class="craft-tab" data-craft-tab="forge">鍛冶</button>
+        <button type="button" class="craft-tab" data-craft-tab="equipment">装備</button>
+      </div>
+      <div id="materialsCraft" class="craft-content active"><div id="materialList" class="material-list"></div></div>
+      <div id="developmentCraft" class="craft-content"><div id="developmentList" class="craft-list"></div></div>
+      <div id="forgeCraft" class="craft-content"><div id="forgeList" class="craft-list"></div></div>
+      <div id="equipmentCraft" class="craft-content"><div id="equipmentBonus">装備補正：攻撃 +0% / HP +0%</div><div id="equipmentList" class="craft-list"></div></div>
     </aside>
   </main>
 
@@ -66,5 +86,6 @@
   <script src="game.js"></script>
   <script src="world.js"></script>
   <script src="enemy-dex.js"></script>
+  <script src="crafting.js"></script>
 </body>
 </html>

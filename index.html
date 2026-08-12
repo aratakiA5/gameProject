@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="world.css" />
   <link rel="stylesheet" href="crafting.css" />
   <link rel="stylesheet" href="demon.css" />
+  <link rel="stylesheet" href="pan.css" />
 </head>
 <body>
   <main class="desktop-space">
@@ -31,7 +32,11 @@
         <button id="returnBaseBtn" type="button">拠点へ帰還</button>
       </div>
     </div>
-    <section id="worldGrid" class="world-grid" aria-label="未踏領域グリッド"></section>
+    <div id="worldViewport" class="world-viewport">
+      <section id="worldGrid" class="world-grid" aria-label="未踏領域グリッド"></section>
+    </div>
+    <div class="camera-hint">マップをドラッグして視点移動</div>
+    <button id="cameraCenterBtn" class="camera-center-btn" type="button">拠点へ視点移動</button>
     <div class="world-help">探検隊と魔王軍はそれぞれ自動進行。未踏領域を別方向から開拓しています</div>
 
     <aside id="dexPanel" class="dex-panel" aria-hidden="true">
@@ -89,5 +94,6 @@
   <script src="enemy-dex.js"></script>
   <script src="crafting.js"></script>
   <script src="demon-faction.js"></script>
+  <script src="pan.js"></script>
 </body>
 </html>

@@ -3,7 +3,7 @@ const EXPLORE_SAVE_KEY='seikai-exploration-v1';
 const WORLD_COLS=18;
 const WORLD_ROWS=10;
 const BASE_POS={x:7,y:4};
-const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const worldSleep=ms=>new Promise(r=>setTimeout(r,ms));
 
 const worldBuildingDefs={
   mine:{name:'遺晶採掘所',icon:'⛏'},barracks:{name:'訓練所',icon:'⚔'},infirmary:{name:'治療院',icon:'✚'},
@@ -112,16 +112,16 @@ function conquerTarget(){
 }
 async function loseExpedition(){
   explore.losses++;explore.explorer={...BASE_POS};saveExplore();expedition.target=null;expedition.enemies=[];expedition.enemyIndex=0;expedition.battling=false;
-  setExploreMessage('探検隊敗北。拠点へ撤退','3秒後に再出撃します');buildWorldGrid();await sleep(3000);resetExpeditionHp();buildWorldGrid();
+  setExploreMessage('探検隊敗北。拠点へ撤退','3秒後に再出撃します');buildWorldGrid();await worldSleep(3000);resetExpeditionHp();buildWorldGrid();
 }
 async function fightTarget(){
   expedition.battling=true;
   for(let i=0;i<expedition.enemies.length;i++){
     expedition.enemyIndex=i;const enemy=expedition.enemies[i];
     while(enemy.hp>0&&expedition.hp>0){
-      const stats=partyStats();const allyDmg=Math.max(1,Math.round(stats.power*(.16+Math.random()*.08)));enemy.hp-=allyDmg;buildWorldGrid();await sleep(520);
+      const stats=partyStats();const allyDmg=Math.max(1,Math.round(stats.power*(.16+Math.random()*.08)));enemy.hp-=allyDmg;buildWorldGrid();await worldSleep(520);
       if(enemy.hp<=0)break;
-      const enemyDmg=Math.max(1,Math.round(enemy.power*(.16+Math.random()*.07)));expedition.hp-=enemyDmg;buildWorldGrid();await sleep(520);
+      const enemyDmg=Math.max(1,Math.round(enemy.power*(.16+Math.random()*.07)));expedition.hp-=enemyDmg;buildWorldGrid();await worldSleep(520);
     }
     if(expedition.hp<=0){await loseExpedition();return false;}
   }
@@ -130,11 +130,11 @@ async function fightTarget(){
 async function autoExploreLoop(){
   resetExpeditionHp();
   while(autoRunning){
-    if(expedition.battling){await sleep(250);continue;}
+    if(expedition.battling){await worldSleep(250);continue;}
     const target=chooseNextTarget();
-    if(!target){setExploreMessage('全領域の調査が完了しました','新たな地域の追加を待っています');await sleep(2000);continue;}
-    expedition.target=target;expedition.enemies=createEnemies(target.x,target.y);buildWorldGrid();setExploreMessage('探検隊が未踏領域へ進軍','敵部隊を全滅させると領域が開放されます');await sleep(900);
-    await fightTarget();await sleep(900);
+    if(!target){setExploreMessage('全領域の調査が完了しました','新たな地域の追加を待っています');await worldSleep(2000);continue;}
+    expedition.target=target;expedition.enemies=createEnemies(target.x,target.y);buildWorldGrid();setExploreMessage('探検隊が未踏領域へ進軍','敵部隊を全滅させると領域が開放されます');await worldSleep(900);
+    await fightTarget();await worldSleep(900);
   }
 }
 function returnBase(){explore.explorer={...BASE_POS};expedition.target=null;expedition.enemies=[];expedition.battling=false;resetExpeditionHp();saveExplore();setExploreMessage('手動帰還しました','AUTO探索を拠点から再開します');buildWorldGrid();}
